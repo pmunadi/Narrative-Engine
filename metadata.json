@@ -1,0 +1,5 @@
+{
+  "name": "Narrative Engine",
+  "description": "An AI-powered application that extracts key insights from long audio and transforms them into ready-to-use short narration clips.",
+  "requestFramePermissions": []
+}
