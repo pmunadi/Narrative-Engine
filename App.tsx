@@ -33,14 +33,15 @@ const App: React.FC = () => {
 
   const checkDuration = (file: File): Promise<number> => {
     return new Promise((resolve) => {
-      const audio = new Audio();
+      const isVideo = file.type.startsWith('video/');
+      const element = isVideo ? document.createElement('video') : new Audio();
       const objectUrl = URL.createObjectURL(file);
-      audio.src = objectUrl;
-      audio.onloadedmetadata = () => {
+      element.src = objectUrl;
+      element.onloadedmetadata = () => {
         URL.revokeObjectURL(objectUrl);
-        resolve(audio.duration);
+        resolve(element.duration);
       };
-      audio.onerror = () => {
+      element.onerror = () => {
         URL.revokeObjectURL(objectUrl);
         resolve(0);
       };
@@ -65,13 +66,13 @@ const App: React.FC = () => {
     try {
       const duration = await checkDuration(audioFile);
       if (duration > MAX_DURATION_SECONDS) {
-        setError(`Audio duration (${Math.round(duration / 60)} minutes) exceeds the 60-minute limit.`);
+        setError(`Durasi file (${Math.round(duration / 60)} menit) melebihi batas 60 menit.`);
         setIsProcessing(false);
         return;
       }
 
       if (audioFile.size > MAX_FILE_SIZE) {
-        setError("File size is too large. Maximum 100MB.");
+        setError("Ukuran file terlalu besar. Maksimal 100MB.");
         setIsProcessing(false);
         return;
       }
@@ -79,11 +80,11 @@ const App: React.FC = () => {
       const base64 = await fileToBase64(audioFile);
 
       // Step 1: Analyze
+      // Note: Gemini can handle both audio and video mimetypes via inlineData.
       const analysisResult = await analyzeAudioContent(base64, audioFile.type);
       setAnalysis(analysisResult);
 
       // Step 2: Generate Clips (Table Data)
-      // Fix: Corrected function call from generateNarrationClips to generateNarrativeClips
       const clipsResult = await generateNarrativeClips(analysisResult);
       setClips(clipsResult);
 
@@ -93,7 +94,7 @@ const App: React.FC = () => {
 
     } catch (err: any) {
       console.error(err);
-      setError("An error occurred during processing. Please try again with a valid audio file.");
+      setError("Terjadi kesalahan saat memproses. Pastikan file video atau audio yang diunggah valid.");
     } finally {
       setIsProcessing(false);
     }
@@ -113,7 +114,7 @@ const App: React.FC = () => {
     doc.setFontSize(10);
     doc.setTextColor(100);
     doc.text(`Generated on: ${timestamp}`, 14, 28);
-    doc.text(`Source: ${audioFile?.name || 'Uploaded Audio'}`, 14, 33);
+    doc.text(`Source: ${audioFile?.name || 'Uploaded File'}`, 14, 33);
 
     // Prepare table data
     const tableData = clips.map(clip => [
