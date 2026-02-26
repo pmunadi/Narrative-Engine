@@ -18,6 +18,7 @@ const NarrativeTable: React.FC<NarrativeTableProps> = ({ clips, loading }) => {
             <tr className="bg-slate-900/50">
               <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-indigo-400 border-b border-slate-700">#</th>
               <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-indigo-400 border-b border-slate-700">New Narration</th>
+              <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-indigo-400 border-b border-slate-700">Description</th>
               <th className="px-6 py-4 text-xs font-bold uppercase tracking-widest text-indigo-400 border-b border-slate-700">Highlights</th>
             </tr>
           </thead>
@@ -26,6 +27,7 @@ const NarrativeTable: React.FC<NarrativeTableProps> = ({ clips, loading }) => {
               Array.from({ length: 3 }).map((_, i) => (
                 <tr key={i} className="animate-pulse">
                   <td className="px-6 py-8"><div className="h-4 w-4 bg-slate-700 rounded"></div></td>
+                  <td className="px-6 py-8"><div className="space-y-2"><div className="h-4 w-full bg-slate-700 rounded"></div><div className="h-4 w-5/6 bg-slate-700 rounded"></div></div></td>
                   <td className="px-6 py-8"><div className="space-y-2"><div className="h-4 w-full bg-slate-700 rounded"></div><div className="h-4 w-5/6 bg-slate-700 rounded"></div></div></td>
                   <td className="px-6 py-8"><div className="space-y-2"><div className="h-3 w-1/2 bg-slate-700 rounded"></div><div className="h-3 w-1/3 bg-slate-700 rounded"></div></div></td>
                 </tr>
@@ -38,7 +40,12 @@ const NarrativeTable: React.FC<NarrativeTableProps> = ({ clips, loading }) => {
                   </td>
                   <td className="px-6 py-6 align-top">
                     <div className="text-slate-200 text-sm leading-relaxed whitespace-pre-wrap">
-                      {clip.narration}
+                       {clip.narration}
+                    </div>
+                  </td>
+                  <td className="px-6 py-6 align-top">
+                    <div className="text-slate-400 text-xs italic leading-relaxed">
+                      {clip.description}
                     </div>
                   </td>
                   <td className="px-6 py-6 align-top">

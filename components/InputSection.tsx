@@ -55,10 +55,10 @@ const InputSection: React.FC<InputSectionProps> = ({
     }
   };
 
-  const triggerUpload = (type: 'video' | 'audio') => {
+  const triggerUpload = () => {
     if (loading) return;
     if (fileInputRef.current) {
-      fileInputRef.current.accept = type === 'video' ? 'video/*' : 'audio/*';
+      fileInputRef.current.accept = 'video/*,audio/*';
       fileInputRef.current.click();
     }
   };
@@ -86,32 +86,26 @@ const InputSection: React.FC<InputSectionProps> = ({
 
       <div className="space-y-4">
         {!selectedFileName ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="flex flex-col items-center">
             <button
-              onClick={() => triggerUpload('video')}
+              onClick={triggerUpload}
               disabled={loading}
-              className="group flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-dashed border-slate-700 hover:border-indigo-500 hover:bg-indigo-500/5 transition-all text-center"
+              className="w-full group flex flex-col items-center gap-4 p-10 rounded-2xl border-2 border-dashed border-slate-700 hover:border-indigo-500 hover:bg-indigo-500/5 transition-all text-center"
             >
-              <div className="w-14 h-14 rounded-full bg-slate-700 text-slate-400 group-hover:bg-indigo-500/20 group-hover:text-indigo-400 flex items-center justify-center transition-all">
-                <i className="fa-solid fa-video text-xl"></i>
+              <div className="w-16 h-16 rounded-full bg-slate-700 text-slate-400 group-hover:bg-indigo-500/20 group-hover:text-indigo-400 flex items-center justify-center transition-all">
+                <i className="fa-solid fa-cloud-arrow-up text-2xl"></i>
               </div>
               <div>
-                <p className="text-slate-200 font-bold text-sm uppercase tracking-wider">Unggah Video</p>
-                <p className="text-slate-500 text-xs mt-1">Seret video ke sini atau klik</p>
+                <p className="text-slate-200 font-bold text-lg uppercase tracking-wider">Unggah Media</p>
+                <p className="text-slate-500 text-sm mt-1">Seret video atau audio ke sini atau klik untuk memilih</p>
               </div>
-            </button>
-
-            <button
-              onClick={() => triggerUpload('audio')}
-              disabled={loading}
-              className="group flex flex-col items-center gap-4 p-8 rounded-2xl border-2 border-dashed border-slate-700 hover:border-cyan-500 hover:bg-cyan-500/5 transition-all text-center"
-            >
-              <div className="w-14 h-14 rounded-full bg-slate-700 text-slate-400 group-hover:bg-cyan-500/20 group-hover:text-cyan-400 flex items-center justify-center transition-all">
-                <i className="fa-solid fa-microphone-lines text-xl"></i>
-              </div>
-              <div>
-                <p className="text-slate-200 font-bold text-sm uppercase tracking-wider">Unggah Audio</p>
-                <p className="text-slate-500 text-xs mt-1">Seret audio ke sini atau klik</p>
+              <div className="flex gap-4 mt-2">
+                <div className="flex items-center gap-2 text-slate-500 text-xs">
+                  <i className="fa-solid fa-video"></i> Video
+                </div>
+                <div className="flex items-center gap-2 text-slate-500 text-xs">
+                  <i className="fa-solid fa-microphone-lines"></i> Audio
+                </div>
               </div>
             </button>
           </div>

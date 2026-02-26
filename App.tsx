@@ -5,7 +5,7 @@ import InputSection from './components/InputSection';
 import ResultBox from './components/ResultBox';
 import NarrativeTable from './components/NarrativeTable';
 // Fix: Corrected imported function name from generateNarrationClips to generateNarrativeClips
-import { analyzeAudioContent, generateNarrativeClips, NarrativeClip } from './services/geminiService';
+import { analyzeAudioContent, generateNarrativeClips, NarrativeClip, translateClips } from './services/geminiService';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -17,6 +17,8 @@ const App: React.FC = () => {
   const [analysis, setAnalysis] = useState('');
   const [clips, setClips] = useState<NarrativeClip[]>([]);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [currentLang, setCurrentLang] = useState<'ID' | 'EN'>('ID');
   const [error, setError] = useState<string | null>(null);
 
   const fileToBase64 = (file: File): Promise<string> => {
@@ -53,6 +55,7 @@ const App: React.FC = () => {
     setAnalysis('');
     setClips([]);
     setError(null);
+    setCurrentLang('ID');
   };
 
   const handleProcess = async () => {
@@ -62,6 +65,7 @@ const App: React.FC = () => {
     setAnalysis('');
     setClips([]);
     setIsProcessing(true);
+    setCurrentLang('ID'); // Reset to default ID on new process
 
     try {
       const duration = await checkDuration(audioFile);
@@ -100,6 +104,24 @@ const App: React.FC = () => {
     }
   };
 
+  const handleTranslate = async () => {
+    if (!clips.length || isTranslating) return;
+
+    setIsTranslating(true);
+    const targetLang = currentLang === 'ID' ? 'English' : 'Indonesian';
+    
+    try {
+      const translated = await translateClips(clips, targetLang);
+      setClips(translated);
+      setCurrentLang(currentLang === 'ID' ? 'EN' : 'ID');
+    } catch (err) {
+      console.error("Translation failed", err);
+      setError("Gagal menerjemahkan konten.");
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
   const exportPDF = useCallback(() => {
     if (!clips.length) return;
 
@@ -120,20 +142,22 @@ const App: React.FC = () => {
     const tableData = clips.map(clip => [
       clip.id,
       clip.narration,
+      clip.description,
       clip.highlights.join('\n\n')
     ]);
 
     autoTable(doc, {
       startY: 40,
-      head: [['#', 'New Narration', 'Highlights']],
+      head: [['#', 'New Narration', 'Description', 'Highlights']],
       body: tableData,
       headStyles: { fillColor: [63, 81, 181], textColor: [255, 255, 255] },
       columnStyles: {
         0: { cellWidth: 10 },
-        1: { cellWidth: 110 },
-        2: { cellWidth: 60 }
+        1: { cellWidth: 70 },
+        2: { cellWidth: 50 },
+        3: { cellWidth: 50 }
       },
-      styles: { fontSize: 9, cellPadding: 5, overflow: 'linebreak' },
+      styles: { fontSize: 8, cellPadding: 4, overflow: 'linebreak' },
       alternateRowStyles: { fillColor: [245, 247, 250] }
     });
 
@@ -179,17 +203,31 @@ const App: React.FC = () => {
                 <h3 className="font-semibold text-slate-200 uppercase tracking-wider text-sm">Narrative Strategy Table</h3>
               </div>
               {clips.length > 0 && (
-                <button 
-                  onClick={exportPDF}
-                  className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold flex items-center gap-2 transition-all shadow-lg shadow-indigo-500/20"
-                >
-                  <i className="fa-solid fa-file-pdf"></i>
-                  Download PDF
-                </button>
+                <div className="flex items-center gap-2">
+                  <button 
+                    onClick={handleTranslate}
+                    disabled={isTranslating}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold flex items-center gap-2 transition-all shadow-lg shadow-indigo-500/20 disabled:opacity-50"
+                  >
+                    {isTranslating ? (
+                      <i className="fa-solid fa-circle-notch animate-spin"></i>
+                    ) : (
+                      <i className="fa-solid fa-language"></i>
+                    )}
+                    {currentLang === 'ID' ? 'Translate IDN to ENG' : 'Translate ENG to IDN'}
+                  </button>
+                  <button 
+                    onClick={exportPDF}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-500 text-white rounded-lg text-xs font-bold flex items-center gap-2 transition-all shadow-lg shadow-indigo-500/20"
+                  >
+                    <i className="fa-solid fa-file-pdf"></i>
+                    Download PDF
+                  </button>
+                </div>
               )}
             </div>
             
-            <NarrativeTable clips={clips} loading={isProcessing && clips.length === 0} />
+            <NarrativeTable clips={clips} loading={(isProcessing && clips.length === 0) || isTranslating} />
           </div>
         )}
 
